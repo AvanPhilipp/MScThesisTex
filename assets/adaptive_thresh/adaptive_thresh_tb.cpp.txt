@@ -1,0 +1,140 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include "ap_int.h"
+#include "hls_stream.h"
+
+#include "opencv2/opencv.hpp"
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+
+#include "common/xf_sw_utils.h"
+
+//#include "adaptive_thrash.h"
+#include "more_adaptive_thrash.h"
+
+int main(int argc, char** argv)
+{
+	if (argc != 2)
+	{
+		fprintf(stderr,"Invalid Number of Arguments!\nUsage:\n");
+		fprintf(stderr,"<Executable Name> <input image path> \n");
+		return -1;
+	}
+
+	cv::Mat in_img, out_img, ocv_thresh, diff;
+
+	in_img = cv::imread(argv[1],0); // reading in the gray image
+
+//	in_img.create(32,32,CV_8U);
+//	int var = 0;
+//	for (int i = 0; i < 32; ++i) {
+//		for (int j = 0; j < 32; ++j, var++) {
+//			if(i>8 && j>8&& i<24 &&j<24){
+//				in_img.data[var] = 2;
+//			}
+//			else {
+//				in_img.data[var] = 0;
+//			}
+//		}
+//	}
+
+
+	if (in_img.data == NULL)
+	{
+		fprintf(stderr,"Cannot open image at %s\n",argv[1]);
+		return 0;
+	}
+
+	unsigned char shift = SHIFT;
+
+
+	/*  convert to specific types  */
+//	in_img.convertTo(in_conv_img,CV_8U);			//Size conversion
+
+
+		/////////////////    OpenCV reference   /////////////////
+	out_img.create(in_img.rows,in_img.cols,CV_8U); // create memory for output image
+	diff.create(in_img.rows,in_img.cols,CV_8U);    // create memory for difference image
+
+	cv::Point anchor = cv::Point( -1, -1 );
+
+
+	cv::adaptiveThreshold(in_img,ocv_thresh,255,CV_ADAPTIVE_THRESH_MEAN_C,CV_THRESH_BINARY,7,2);
+//	cv::boxFilter(in_img,ocv_thresh,CV_8UC1,cv::Size(7,7),cv::Point(-1,-1),true,cv::BORDER_CONSTANT);
+//	cv::boxFilter(in_img,ocv_thresh,CV_8UC1,cv::Size(7,7),cv::Point(-1,-1),true,cv::BORDER_REPLICATE);
+
+	imwrite("OCV_img.jpg", ocv_thresh);  // reference image
+
+	static xf::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(in_img.rows,in_img.cols);
+	ap_uint<8> arrayInput[in_img.rows * in_img.cols];
+	static xf::Mat<TYPE,HEIGHT,WIDTH,NPC1> imgOutput(in_img.rows,in_img.cols);
+	ap_uint<8> arrayOutput[in_img.rows * in_img.cols];
+
+	static xf::Mat<TYPE,HEIGHT,WIDTH,NPC1> imgStreamOutput(in_img.rows,in_img.cols);
+
+	imgInput.copyTo(in_img.data);
+	xf::xfMat2Array(imgInput,arrayInput);
+	adaptive_thresh_accel(arrayInput,arrayOutput,2,imgInput.cols,imgInput.rows);
+	xf::Array2xfMat(arrayOutput,imgOutput);
+	xf::imwrite("HLS_array_img.jpg", imgOutput);
+
+	imgInput.copyTo(in_img.data);
+	adaptive_thresh(imgInput,imgStreamOutput,2);
+	xf::imwrite("HLS_img.jpg", imgStreamOutput);
+
+
+	for (int i=0;i<imgStreamOutput.rows;i++){
+		for(int j=0;j<imgStreamOutput.cols;j++){
+			if(imgStreamOutput.data[i*imgOutput.cols +j] < imgOutput.data[i*imgOutput.cols +j]){
+				diff.at<unsigned char>(i,j) = 128;
+			}
+			else
+				if (imgStreamOutput.data[i*imgOutput.cols +j] > imgOutput.data[i*imgOutput.cols +j]){
+				diff.at<unsigned char>(i,j) = 255;
+			}
+			else{
+				diff.at<unsigned char>(i,j) = 0;
+			}
+		}
+	}
+
+	xf::absDiff(ocv_thresh,imgStreamOutput,diff);    // Compute absolute difference image
+
+	imwrite("diff_img.jpg",diff);
+    // Save the difference image for debugging purpose
+
+	double minval=256,maxval=0;
+	int cnt = 0;
+	for (int i=0;i<in_img.rows;i++){
+		for(int j=0;j<in_img.cols;j++){
+//			unsigned char v1 = ocv_ref.at<unsigned char>(i,j);
+//			unsigned char v2 = out_img.at<unsigned char>(i,j);
+			unsigned char v = diff.at<unsigned char>(i,j);
+			if (v>0){
+				cnt++;
+//				diff.at<unsigned char>(i,j) = 255;
+			}
+			if (minval > v )
+				minval = v;
+			if (maxval < v)
+				maxval = v;
+		}
+	}
+
+//	imwrite("diff_img.jpg",diff);
+
+	float err_per = 100.0*(float)cnt/(in_img.rows*in_img.cols);
+	fprintf(stderr,"Minimum error in intensity = %f\nMaximum error in intensity = %f\nPercentage of pixels above error threshold = %f\n",minval,maxval,err_per);
+
+//	in_gray.~Mat();
+//	in_conv_img.~Mat();
+
+	ocv_thresh.~Mat();
+	diff.~Mat();
+	if(err_per > 1.0f)
+		return 1;
+	in_img.~Mat();
+	out_img.~Mat();
+	return 0;
+}

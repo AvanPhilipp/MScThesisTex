@@ -1,0 +1,35 @@
+#include "/opt/Xilinx/Vivado/2018.3/include/gmp.h"
+#include "more_adaptive_thrash.h"
+#include "preproc.h"
+
+void preproc(	hls::stream< ap_axiu<8,1,1,1> >& _src,
+		hls::stream< ap_axiu<8,1,1,1> >& _dst,
+		unsigned char kernel1[FILTER_SIZE*FILTER_SIZE],
+		unsigned char kernel2[FILTER_SIZE*FILTER_SIZE],
+		unsigned char kernel3[FILTER_SIZE*FILTER_SIZE],
+		uint32_t height,
+		uint32_t width	){
+	xf::Mat<TYPE, HEIGHT, WIDTH, NPC1> x_src(height,width);
+	xf::Mat<TYPE, HEIGHT, WIDTH, NPC1> x_dst(height,width);
+
+	xf::AXIvideo2xfMat(_src, x_src);
+
+	xf::Mat<TYPE, HEIGHT, WIDTH, NPC1> tmp_1(height,width);
+	xf::erode<XF_BORDER_REPLICATE,TYPE,HEIGHT, WIDTH,KERNEL_SHAPE,FILTER_SIZE,FILTER_SIZE,ITERATIONS,NPC1>(x_src,tmp_1, kernel1);
+
+	xf::Mat<TYPE, HEIGHT, WIDTH, NPC1> tmp_2(height,width);
+	xf::GaussianBlur<XF_FILTER_5X5,XF_BORDER_CONSTANT,TYPE,HEIGHT,WIDTH, NPC1>(tmp_1, tmp_2, 1);
+
+	xf::Mat<TYPE, HEIGHT, WIDTH, NPC1> tmp_3(height,width);
+	unsigned char Otsuval;
+//	xf::OtsuThreshold<TYPE, HEIGHT, WIDTH, NPC1>(tmp_2, Otsuval);
+	xf::Threshold<THRESH_TYPE,TYPE,HEIGHT,WIDTH,NPC1>(tmp_2, tmp_3,128,255);
+//	more_adaptive_thresh(tmp_2,tmp_3,2);
+
+	xf::Mat<TYPE, HEIGHT, WIDTH, NPC1> tmp_4(height,width);
+	xf::erode<XF_BORDER_REPLICATE,TYPE,HEIGHT, WIDTH,KERNEL_SHAPE,FILTER_SIZE,FILTER_SIZE,ITERATIONS,NPC1>(tmp_3, tmp_4, kernel2);
+
+	xf::dilate<XF_BORDER_REPLICATE,TYPE,HEIGHT, WIDTH,KERNEL_SHAPE,FILTER_SIZE,FILTER_SIZE,ITERATIONS,NPC1>(tmp_4,x_dst, kernel3);
+
+	xf::xfMat2AXIvideo(x_dst, _dst);
+}

@@ -1,0 +1,16 @@
+#pragma HLS INTERFACE m_axi depth=1024 port=kernel1 offset=slave bundle=kernel1
+#pragma HLS INTERFACE m_axi depth=1024 port=kernel2 offset=slave bundle=kernel2
+#pragma HLS INTERFACE m_axi depth=1024 port=kernel3 offset=slave bundle=kernel3
+#pragma HLS INTERFACE s_axilite port=width
+#pragma HLS INTERFACE s_axilite port=height
+#pragma HLS INTERFACE s_axilite port=return
+#pragma HLS INTERFACE axis register both port=_dst
+#pragma HLS INTERFACE axis register both port=_src
+#pragma HLS DATAFLOW
+
+#pragma HLS STREAM variable=x_src.data depth=1 dim=1
+#pragma HLS STREAM variable=x_dst.data depth=1 dim=1
+#pragma HLS STREAM variable=tmp_1.data depth=1 dim=1
+#pragma HLS STREAM variable=tmp_2.data depth=1 dim=1
+#pragma HLS STREAM variable=tmp_3.data depth=1 dim=1
+#pragma HLS STREAM variable=tmp_4.data depth=1 dim=1

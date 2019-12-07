@@ -1,0 +1,32 @@
+A diplomamunka minimális terjedelme MSc képzésen 40 számozott oldal és, minimum 65 000 karakter szóközök nélkül.
+A maximális terjedelem mellékletekkel együtt sem haladhatja meg a 120 oldalt.
+
+4. Az images mappában található kutyás és macskás képeket nyugodtan töröld. :) A contents mappában is nyugodtan átnevezheted a fájlokat, törölheted őket, újakat létrehozhatsz, csak fontos, hogy a változtatásoknak megfelelően a contents.tex fájl tartalmát módosítsd értelemszerűen. A contents mappában található z_example.py fájl is csak egy példafájl ahhoz, hogy bemutassam, hogy hogyan lehet forráskódot beilleszteni a dokumentumba. Nyugodtan töröld. Ha nincs mellékleted, akkor a contents/melleklet.tex fájl is törölheted, csak akkor a contents.tex fájlból is töröld a megfelelő részt.
+
+5. A hivatkozasok.bib http://www.citethisforme.com/ieee
+6. Táblázatokat a https://www.tablesgenerator.com/
+
+
+8. Olyan rövidítés után, ami nem végig nagybetűs, a pont miatt a LaTeX azt hiszi majd, mondat vége van, és nagyobb szóközt rak. Normál szóköz lesz, ha elé írsz egy backspacet:
+... mint pl.\ itt
+Ha a rövidítés végig nagybetűs, de a mondat végén áll, \@ használandó a pont előtt:
+... ezt tartalmazza a PDF\@.
+
+9. 
+\begin{figure}[htbp]
+A következő tippeket (engedélyeket) adhatod, érdemes többet is:
+    h Futó szövegbe beszúrás
+    t Elhelyezés egy oldal tetején
+    b Elhelyezés egy oldal alján
+    p Elhelyezés külön oldalon
+
+Így hivatkozz az ábrára:
+    \begin{figure}
+    \centering
+    \includegraphics{kep.png}
+    \caption{informativ kepalairas}
+    \label{abraneve} % ez csak belso hasznalatra
+    \end{figure}
+
+Hakkel Tamás
+2019

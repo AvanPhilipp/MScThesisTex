@@ -1,0 +1,321 @@
+\chapter{Planning} \label{ch:plan} % 21758 characters
+
+\section{Concept and Ideas} % 260 characters
+The first step of developing a device is to decide on the specifications and functionalities.
+For this, the First step was to approach Dr. Antal Hiba, one of the developers of the used algorithm.
+Since he was a previous doctorate on the University, he was eager to help and provided his own Python implementation.
+
+\subsection{The Algorithm} % 2274 characters
+Previously the research group of the embedded system laboratory of the university developed an algorithm to track the trajectory of a flying object.
+This system is also used to determine whether the trajectory is crossing the path of the drone or it avoids it.
+The Python code is tested on the Airsim simulation.
+The simulation can be adjusted at the beginning to cross the other drone on different angled trajectories and can be started via a button push.
+Connecting to the simulator server via Ethernet connection, the client machine can run the code, that prints on the client-side display the image of the simulator, the detected bounding box and the resulting trajectory.
+
+After connecting to the server, the client requires an image from the simulator.
+The simulator can provide multiple data, including 5 camera angles (front-left, -centre -right; bottom; back) and in some models, there is a driver view as well.
+With the computer vision settings, it also has Depth Vision, Depth Perspective, Segmentation, Surface Normalized images.
+However, for our purposes, the Scene view is only required, which is the visual front camera of the drone.
+This image is considered the equivalent of the camera image of a real-life drone.
+
+The images are converted to the OpenCV \cite{opencv_library} data format.
+After removing the alpha channel, a preprocessing algorithm is applied.
+For easier calculations, the image is converted to grayscale.
+This algorithm is consists of many well-known image processing algorithms, such as gaussian blur or erode.
+The preprocessing step separates the horizon and the aerial spaces, reducing the area where the algorithm should calculate.
+The aerial space then searched for possible dangerous objects, by reducing the images to edges and contours \cite{31447} \cite{SUZUKI198532}.
+For the dangerous parts, bounding boxes in OpenCV are determined, and these boxes are returned to the main block.
+Usually, these boxes are containing cloud fragments, birds, aeroplane contrails, etc.
+The most prominent box is selected by a small CNN (Convolutional Neural Network).
+All the boxes are run through 2 layers of 2D convolutions and 2 fully connected layers.
+Both convolutional layers are using $3\times 3$ kernels, the first with 10 output layer, the second with 5.
+The fully connected layers have 128 and 2 output channels respectively.
+The 2 output at the end of the CNN is one-hot-encoded confidence of whether the object is dangerous or not.
+By selecting the highest confidence, the most dangerous object is selected.
+By applying the same algorithm to the adjacent frames, the change of the bounding boxes can provide a trajectory.
+To determine the trajectory a simple linear tracker is applied.
+This tracker stores the previous data and tries to predict a track.
+
+\section{Camera system} % 401 characters
+For the project, the main goal is to run this algorithm on a live system.
+The input image, in this case, will be a camera image.
+The easier solution is to use the camera of the drone, however, it has a limited view only.
+The GoPro approach is a possible solution of this problem by providing a device available off the shelf, and an interchangeable sensor.
+This, however, is not a viable solution due to the requirement of a lot of HDMI connectors.
+There should be an imager system in place.
+
+\subsection{LogiBricks} % 2306 characters
+In \cref{sec:logibricks} are described as the primary target of the project.
+The SoC is fairly large, and has resources for supporting huge applications, like processing several HD images.
+The camera system can record $360^{\circ}$ images, and the attached cards are securely connected and bolted to the baseboard, reducing the chance of accidental disconnects.
+The FARKA connectors are also automotive ready and securely attached.
+
+At 19th November 2018, the system arrived and assembled in the laboratory.
+There was a prebuilt SD (Secure Digital) card image included which can be plugged in and run without any difficulties.
+The cameras and the connectors were working properly.
+However, the example project had a couple of issues.
+The versions of the shipped IP-s were not met, which was corrected by the company by sending a new download link.
+After the licensing and the version problems solved the block runs were throwing errors at the implementation phase.
+In the video-control block the use of the {oddr\_inst.u\_pix\_clk} resulted in a "cell are unresolved black boxes" error.
+Since the IP core was classified no change in the internal system was allowed.
+
+The video controller IP is responsible for saving the video streams to memory and reading it from it.
+This method can be easily replicated with basic IP cores, so a hand made solution was created.
+The block design expects an image stream from the FMC module, and pixel by pixel saves it to the memory via a VDMA (Video Direct Memory Access) block.
+The VDMA converts the streaming pixel data to a memory-mapped image format.
+It also processes control signals such as horizontal and vertical sync, active video or blanking for re-synchronization after losing input video data.
+From this streaming video data flow, the VDMA creates memory-mapped data and stores it in the onboard DDR memory.
+This can also work in the other direction where the VDMA reads the memory-mapped data and converts it to a stream with the corresponding control signals.
+
+The other issue with the handmade solution is the IIC configuration.
+The cameras are in a sleep mode state by default.
+To get the image data, the cameras should be wakened and set up properly.
+This is done through an IIC mux that directs the control signals to the correct camera.
+This IIC block is also a LogicBrick\texttrademark IP shipped without documentation.
+Since no programming guide was found to the camera control board, the code was reverse-engineered from the added example project.
+The resulting code was maybe good but since no bitstream was generated it cannot be tested.
+The reverse engineering cannot be tested as well, due to the complex software.
+
+For the future, a working block design must be created and the IIC control code should be tested.
+
+\subsection{AvNet MiPi} % 1539 characters
+After the failed attempt on the Logibricks\texttrademark camera system, another similar system was introduced. 
+The Avnet\texttrademark \cite{avnet_HUG} company uses the same approach.
+The kit also securely bolted to the baseboard, and FARKA connectors are used as well.
+This system, however, uses an open software approach and provides sample projects as well as programming guides.
+The board transfers MIPI standard video data through the FMC connector.
+
+To use this system the a MIPI D-PHY block is required to process the clock-forwarded synchronous MIPI CSI-2 link protocol.
+This provides high noise immunity and high jitter tolerance.
+It is also implemented by Xilinx.
+The IP has an example design where the incoming MIPI camera signal is transmitted to the HDMI connector.
+This example design, however, has some IPs blocks that are bounded by licence thus a D-PHY system was assembled by hand without the HDMI part.
+
+Assembling this system reveals another problem.
+The MIPI card pin settings that are described in the programming guide does not correspond with the Xilinx recommendation.
+In order to connect to the card, the pin setting should either be set according to the Xilinx settings, that results in an invalid input source error in the program.
+It is also dangerous for both the card and the ZCU102 as well, since the connections can be overloaded due to the programs.
+The other option is to set the pins as the programming guide, which case the Vivado\texttrademark does not allow the bitstream generation process due to critical warnings.
+There was also example projects found on the internet, that resulted in the same errors.
+Xilinx\texttrademark also provides an example project for another MIPI card but both the manufacturer and the assembly is different.
+The two cards are definitely not interchangeable, thus he configurations are not compatible with each other.
+
+\subsection{HDMI I/O} % 1530 characters
+There was also an approach to transfer the image data from the simulator to the image processor via HDMI.
+This was first implemented with the Avnet AES-FMC-HDMI-CAM-G card \cite{avnet_HDMI}.
+The HDMI converter chip on the card uses the ITU-R Recommendation BT.601 or 709 colour space, and for transmitting this it uses the ITU-R BT.656 digital video protocol.
+This standard includes the horizontal and vertical signals into the data stream.
+This allows transferring of uncompressed data, both parallel and serial.
+Originally the system is designed for digital TV.
+In this case, the serial is used which requires 13MHz per pixel transfer speed.
+The card also uses the serial approach.
+The pixels are encoded to 16 bits based on the YCrCb 4:2:2 standards.
+At each clock comes either a YCr or a YCb value pair.
+Both the Y and the Cr and Cb are encoded in 8 bits hence the 16-bit bandwidth.
+This reduces the 24-bit requirement of the VGA (Video Graphics Array) connector.
+
+For such transmission, the Xilinx provided IPs are still in preproduction, but it can be used.
+However, the example project has some IP that the University license does not cover, so no block is generated.
+To overcome this obstacle a hand made solution was introduced again.
+The previously introduced VDMA connects to a Video AXI (Advanced eXtensible Interface) controller and stores the video to the memory.
+On the other side of the AXI controller, a VHDL module feeds the streaming data.
+This module is responsible for generating the control signals for the video data.
+The control signals are calculated with a shift register that shifts the video data by 4 clock cycles.
+These cycles are enough for the detector subsystem to recognise the EAV (End Active Video) and SAV (Strat Active Video) signals.
+After such signal is detected the correct control signals are transmitted according to the inner state of the block.
+
+\section{Python environment} % 242 characters
+For a final solution, the Ethernet solution was implemented.
+The PYNQ system tough works well for the dedicated boards, the ZCU102 is not one of them.
+For this, the Operating system should be built for the custom hardware.
+The foundation of the OS is a Petalinux, and it runs on Jupyther notebook.
+
+\subsection{ZCU102} % 2581 characters
+To build a system for a custom architecture requires a lot of superuser actions.
+For safety it is recommended to use a virtual machine, not to ruin the working OS in case of any error.
+The supported boards are easily built through a setup script that set all in place in a couple of hours.
+For the not supported board, the setting must be done by hand.
+First of all, some packages need to be installed or updated, based on the Ubuntu version the VM (Virtual Machine) is installed.
+Most of the systems are general, like the python, Jupyter and the Linux OS.
+These parts are built separately from the device-specific parts.
+The OS can be compiled for arm and aarch64 systems.
+This is decided by the config files.
+There also can be added other OSs, by creating new folders and including the required bootstrap files.
+In the Makefile, the PACKAGE\_BUILD\_\$\{PACKAGE\_NAME\}\_\$\{ARCH\} specifies the package to install and for what architecture it is compiled.
+For different OS and special boards, the parameters should be set before the making process.
+
+For the board-specific parts, the PYNQ has a boards folder.
+All the supported boards have here a subfolder, and for the custom boards also need to be created one.
+In this folder a .spec file sets up 3 crucial variable \texttt{BSP\_\$\{BOARD\}}, \texttt{BITSTREAM\_\$\{BOARD\}}, \texttt{STAGE4\_PACKAGES\_\$\{BOARD\}}. 
+These variables are set up the board-specific settings, like the BSP (Board Support Packages) which is a description of the custom device, including the drivers and libraries.
+All the software are connecting to the BSP, and the BSP connects to the hardware.
+The bitstream contains the programming information for the FPGA.
+The stage 4 packages are the packages that are required to compile board-specific, but it is the part of the OS, like ethernet, USB or display devices.
+
+The two kinds of Xilinx SoCs is Zynq-7000 and Zynq UltraScale+.
+For these, the arm and the aarch64 architectures are used respectively.
+Both systems work properly with the PetaLinux prebuilt BSP, thus no image should be created.
+However, if specified BSP is required then a Viviado project should be created and from than a .hdf file is generated.
+If the .hdf file is copied into the petalinux\_bsp subfolder, it will be automatically included to the final BSP by the compiler process.
+The custom packages are placed in the packages folder and transferred to the compiled system.
+This is a convenient way of installing custom notebooks or Python packages.
+make BOARDDIR=<absolute\_path>/myboards starts the building process of the custom system in the parameter myboards folder.
+
+The created image copied to an SD card, and after a couple of settings on the board the system boots.
+By default the board has a fixed IPv4 (Internet Protocol version 4) address, thus it can be accessed through a client PC.
+The Jupyter server runs on the 9000 port and can be accessed with the user password combination defined in the config file.
+After accessing the notebooks, the Python environment is ready to use.
+The Jupyter environment also provides a root terminal to the system which makes it easy to control the OS.
+
+\subsection{PYNQ overlays} % 2532 chatacters
+For the working PYNQ system, the python codes were implemented easily.
+Since the PNYQ image came with OpenCV preinstalled, the Airsim and the Chainer was the only missing packages.
+Since the system runs from an SD card, the minimization of the package requirements were essential, sine lot of installing and writing to the card may harm the hardware.
+This thesis is oriented in the image processing direction, that why the neural network and the tracker subsystem is not required to be installed.
+With eliminating the two main part of the system, the Chainer package becomes obsolete.
+The Airsim package can be avoidable as well if the images are uploaded to the SD card, for testing purposes.
+This, however, does not provide different images in every iteration.
+For easier integration and to properly validate the system the Airsim package was installed.
+
+The PYNQ system core is running on the processor architecture and supports the Python code form there.
+Since the whole code was written in Python, the algorithm is running on two-arm cores.
+With this the computational power is extremely small, resulting in a 2 fps (frames per seconds) processing speed.
+The speedup, however, lies in the FPGA part that in this case, it is not even in use.
+To use the FPGA part of the chip the PYNQ system provides an Overlay library.
+This is a .bit file compiled for the FPGA and loaded to the Jupyther notebook.
+Along with the bit file, there should be a .hwh file as well.
+The HWH (HardWare Handout) describes the block design as an XML (eXtensible Markup Language), which helps the PYNQ system to provide functions, called register map, for controlling the IP.
+This is similar to the traditional workflow where the Vivado creates a header file for the C++ software implementations.
+With this register map, the endpoints of the blocks can be driven.
+
+Such Overlays can be found on the community-driven forum page of PYNQ.
+People around the world are creating open implementations for numerous tasks, including physical simulations, data mining applications, neural network implementations and image processing algorithms.
+These community-driven overlays are usually compiled to the supported PYNQ boards, which not includes the ZCU102.
+To use it the codes should be compiled for every overlay.
+This may result in a bit of bothersome extra work but nothing more.
+However, the image processing project is just a port from an HLS implementation to the PYNQ.
+For that, the so-called xfOpenCV which is the Xilinx implementation of the C++ OpenCV, can be implemented function by function to the FPGA.
+This saves a lot of work and can speed up even further.
+Since the xfOpenCV contains all the functions, it is a huge library, with lots of unnecessary functions for our project.
+As for the overlays, there can be implemented a specific preprocessing overlay.
+The final preprocessing overlay will require the image and puts out the final processed product.
+In contrast to the function by function solution, the Overlay connects the functions inside by a dataflow.
+
+\section{Image processing} % 887 characters
+For the image processing tasks, the OpenCV Python implementation is used in the original system.
+This is a common and well-used solution.
+Since it is open-source, everyone can compile the source for any machine.
+In this case, the software implementation of the OpenCV is running on the ARM processors of the ZYNQ Ultrascale+ chip.
+The fixed hardware executes the code as any normal processor architecture, so in this case, it is called a software implementation.
+The function is implemented on the FPGA, the output is not generated by one or more similar processing cores but loaded to application-specific hardware.
+In this case, the wires and the LUTs (Look Up Tables) are directly responsible for the output product.
+Therefore this system cannot be used to anything else but the same function every time.
+This function, however, is not limited by the Fetch Decode Execute instruction cycle, nor the data-to-memory-copy latency.
+This gives the advantage over the SI (Single Instruction) processors, resulting in less power use, and higher processing speed.
+
+\subsection{xfOpenCV} % 2823 characters
+The OpenCV implemented to the SoCs by Xilinx is the xfOpenCV.
+This contains over 60 functions similar to the original OpenCV implementation but optimized for programmable logic.
+The library is also open-source, and free.
+The main part is written in C++ and can be used with SDSoC.
+In the SDSoC workflow, the C code is compiled for FPGA, a Vivado project is automatically generated, and the driver software is exported in one go.
+This makes the work of the top-level designer easier but hides all the intermediate steps.
+This is not good for us since the output product here is a full-fledged design running on the FPGA.
+For a PYNQ system, the end product of a Vivado project is required, and the corresponding driver software is written in Python.
+
+In the xfOpenCV, there are example projects for every function implemented.
+These projects are designed for SDSoC but can be imported to an HLS project.
+The function needs to be reworked since the type of the input and output images are xf::Mat template class.
+Such a template class is transcribed as an AXI Master interface, and since all fields of the class are transferred the resulting connection becomes unnecessarily complex.
+To solve this issue there are helper functions, that transfers a cf::Mat to a hls::stream format.
+This stream transfers the image pixel by pixel to the processing function where another function assembles the image again to an xf::Mat.
+
+After this tricky roundabout, the image processing step is ready to start.
+The system is designed as a dataflow, which means that the adjacent functions save there results in a temporary variable and the next function uses this result as an input.
+For this, the FPGA \#dataflow directive provides an implementation, which uses no memory between the functions.
+The function instead of writing the output to an allocated area (as in the SI case), created the interconnect configuration of these functions to be wired together.
+This results in a system that is compact from start to end and uses as less resource as possible.
+
+The negative side is that every data object can be invoked 2 times in the code, first when it is written into, and second is when it is read from.
+In the original algorithm it is not a problem since every function has an input and an output, however, there is a lot of function that may hard to work with.
+Such a method is the Otsu \cite{4310076} threshold calculator function.
+This function requires an image and some calculations later determine an optimal value for thresholding.
+After the value is determined a threshold function can be called to the same image with the Otsu parameter.
+With this method the input image is read two times and is written only once, hence it breaks the dataflow requirement.
+
+This example of the Otsu method is came up as the solution to another problem.
+The problem that there is no Adaptive Threshold implemented in the xfOpenCV.
+In the original algorithm after a Gaussian Blur, there is an Adaptive Threshold \cite{pratt2001digital} \cite{yanowitz1989new} applied.
+This is a convolutional algorithm that uses a kernel to determine a local threshold value.
+This local value is more relevant at the small area of the pixel, hence it can result in a more pronounced result.
+It produces better results on images with poor lighting conditions, or at low pixel values differences.
+The algorithm chose to use this algorithm, in order to eliminate the one-sided illumination of the sun.
+
+\subsection{Threshold} % 2068 characters
+Since it was not implemented in the xfOpenCV package, the first approach was to create one.
+For this, the already implemented convolution function was used.
+This convolution uses a custom kernel and the result is printed to the output image.
+The kernel in the case of the adaptive Threshold should be all ones, so in the final implementation, it can be optimised out.
+For that, the kernel was fully removed.
+The other difference is the thresholding part.
+The convolution only calculates the mean of the pixels, the threshold also compares the calculated mean value to the original pixel.
+This step must be done inside the function to satisfy the dataflow requirements.
+For this, at the end of the convolution, a new condition should be applied to the output value.
+It either returns zero or the max value of the image representation (in this case 8-bit unsigned integer).
+In the OpenCV implementation, there is also a delta value that allows a small differentiation from the mean value.
+However, after adding the required modifications to the solution, the result was not satisfactory.
+It either can be, because of the number representation on the FPGA, or the complicated method in the original OpenCV implementation, that calculates the output value.
+
+The other approach was to replicate the OpenCV original function on the hardware.
+The already implemented box filter works flawlessly in the example design resulting in a 1.616923 \% error rate.
+This is the result of different border conditions.
+xfOpenCV only implemented the constant border values, in the original, there is a replicate border.
+It also can be seen on the differential image.
+The code continues with a double cycle comparing the two images.
+The decision between the output value is weighted by a delta parameter.
+After the decision, the final images differ about 1-9\% error.
+The problem partially comes from the border condition, however, does not explains everything.
+With these mixed results, the adaptive method had to be abandoned.
+
+The final result was done by a simple threshold function, with an arbitrary 128 threshold value.
+This provides an image clear enough for the algorithm to still detect the drone.
+It is a necessity to alter the original system, but since it works as well, it can be used.
+The threshold function requires less resource since it does not involve any convolution.
+For that, the resulting system will require less resource, and it has to be considered at the calculations.
+
+\subsection{Convolution} % 728 characters
+The convolution on a 2D image is done by a 2D kernel as well.
+For this, the image is loaded to the mixer function pixel by pixel, and by every pixel, the neighbouring pixels as well.
+In case of a $32\times32$ image, and a $3\times3$ kernel that requires $9\times32\times32 = 9216$ pixel loads.
+In reality, however, it can be calculated which pixel will load next.
+By reserving two memory buffers to store two lines if the image, the pixels can be loaded to them, and propagated in every calculation step.
+This results in higher memory use but limits the pixel loading to $32\times32 = 1024$ for the image.
+
+Though the resource requirement of loading the picture is minimized, the calculation still requires 9 multiplier circuit, in a case of a $3\times3$ kernel, as well as an adder.
+With this, the difference between the regular and the adaptive threshold are easily be measured.
+
+\section{Decision making} % 788 characters
+The algorithm also contains a decision making neural network, which also can be accelerated by the FPGA part.
+The task is to create a system that runs the CNN on the FPGA.
+For the classification task, only the forward part of the neural network is required, the idea is viable.
+On the other hand, the network has to be taught, and weights should be generated for the kernels.
+This part raises some problems already.
+Since the FPGA uses a streaming data structure, it is hard to save the inner states of the hidden layers.
+As the CNN is synthesised to the device, the inner layers either became wires, that can not be read during the run or should connect to memories.
+These memory cells can be read with a backpropagation algorithm, but it slows the system.
+By introducing memories in the system, at every step a read and a write operation should be done, thus the main purpose of the PL is lost.
+Hence the training of the network should be done offline, on a PC.
+
+\subsection{BNN} % 799 characters
+Among the Python community systems, several libraries implement neural networks.
+One of them is a really interesting approach.
+According to the paper, the neural network contains redundancy, and this handled using binary values instead of floating-point.
+In the first place, this saves a lot of memory, hence instead of 32 bits there only 1 or 2 is stored \cite{NIPS2016_6573}.
+More important is, however, that for the FPGA the floating-point implementation is hard, and requires a lot of resources.
+The 1-bit implementation, on the other hand, can be implemented by simple logic functions.
+On a GPU and a regular processor, this does not mean a huge advantage, since the instructions in these cases are fix sized \cite{7929192}.
+The FPGA with a proper place and route implementation can compress the network many times, due to the programmable hardware property.
+The BNN-PYNQ library \cite{finn} is designed according to this concept.
+The framework allows the user to create a streaming accelerator.
+
+\clearpage

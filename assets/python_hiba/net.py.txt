@@ -1,0 +1,19 @@
+class cnn(chainer.Chain):
+
+    def __init__(self):
+        super(cnn, self).__init__()
+        with self.init_scope():
+            self.c0 = L.Convolution2D(None, 10, 3, stride=1, pad=2)
+            self.c1 = L.Convolution2D(None, 5, 3, 1, 2)
+            # self.c2=L.Convolution2D(None, 64, 3, stride =1, pad = 2, initialW=w1)
+            # self.c3=L.Convolution2D(None, 32, 3, 1, 2, initialW=w1)
+            # self.c4=L.Convolution2D(None, 32, 3, 1, 2, initialW=w1)
+            # self.l1=L.Linear(None, 512, initialW=w2)
+            self.l2 = L.Linear(None, 128)
+            self.l3 = L.Linear(None, 2)
+
+    def __call__(self, x, test=False):
+        h = F.relu(self.c0(x))
+        h = F.max_pooling_2d(F.relu(self.c1(h)), ksize=2, stride=2)
+        h = F.relu(self.l2(h))
+        return self.l3(h)

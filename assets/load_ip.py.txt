@@ -1,0 +1,85 @@
+overlay = pynq.Overlay('/home/xilinx/jupyter_notebooks/preprocess.bit')
+preproc = overlay.preproc_0
+
+MM2S_VDMACR=0x00
+MM2S_VDMASR=0x04
+MM2S_REG_INDEX=0x14
+PARK_PTR_REG=0x28
+VDMA_VERSION=0x2C
+S2MM_VDMACR=0x30
+S2MM_VDMASR=0x34
+S2MM_VDMA_IRQ_MASK=0x3C
+S2MM_REG_INDEX=0x44
+MM2S_VSIZE=0x50
+MM2S_HSIZE=0x54
+MM2S_FRMDLY_STRIDE=0x58
+MM2S_START_ADDRESS=0x5C
+S2MM_VSIZE=0xA0
+S2MM_HSIZE=0xA4
+S2MM_FRMDLY_STRIDE=0xA8
+S2MM_START_ADDRESS=0xAC
+
+XPAR_AXI_VDMA_0_NUM_FSTORES = 3
+
+VDMA_BASE_ADDRESS = 0xA0010000
+PREPROC_BASE_ADDRESS = 0xA0000000
+VDMA_ADDRESS_RANGE = 4096
+PREPROC_ADDRESS_RANGE = 0x10000
+
+img_gray = cv2.imread("airsim_save/img_11.jpg",cv2.IMREAD_GRAYSCALE)
+
+vga_data=xlnk.Xlnk().cma_array(shape=img_gray.shape, dtype=numpy.uint8)
+result_data=xlnk.Xlnk().cma_array(shape=img_gray.shape, dtype=numpy.uint8)
+vga_data[:] = img_gray.data
+
+kernel_size = 7
+kernel = xlnk.Xlnk().cma_array(shape=(kernel_size*kernel_size,), dtype=numpy.uint8)
+
+for i in range(kernel_size):
+    kernel[i] = 1
+    
+kernel.flush()
+
+preproc_mmio = MMIO(PREPROC_BASE_ADDRESS, PREPROC_ADDRESS_RANGE)
+
+preproc_mmio.write(0x28, vga_data.shape[1])
+preproc_mmio.write(0x30, vga_data.shape[0])
+preproc_mmio.write(0x10, kernel.physical_address)
+preproc_mmio.write(0x18, kernel.physical_address)
+preproc_mmio.write(0x20, kernel.physical_address)
+
+result_data.invalidate();
+
+preproc_mmio.write(0x00,0x81)
+
+vdma_mmio = MMIO(VDMA_BASE_ADDRESS, VDMA_ADDRESS_RANGE)
+    
+vdma_mmio.write(MM2S_VDMACR, 0x00000003) #start dma
+
+for i in range(XPAR_AXI_VDMA_0_NUM_FSTORES):
+    vdma_mmio.write(MM2S_START_ADDRESS+(i*4), vga_data.physical_address)
+vdma_mmio.write(MM2S_FRMDLY_STRIDE, vga_data.shape[0])
+vdma_mmio.write(MM2S_HSIZE, vga_data.shape[0])
+vdma_mmio.write(MM2S_VSIZE, vga_data.shape[1])
+    
+tmp = vdma_mmio.read(MM2S_VDMASR)
+
+vdma_mmio.write(S2MM_VDMACR, 0x00000003) #start dma
+
+for i in range(XPAR_AXI_VDMA_0_NUM_FSTORES):
+    vdma_mmio.write(S2MM_START_ADDRESS+(i*4), result_data.physical_address)
+vdma_mmio.write(S2MM_FRMDLY_STRIDE, result_data.shape[0])
+vdma_mmio.write(S2MM_HSIZE, result_data.shape[0])
+vdma_mmio.write(S2MM_VSIZE, result_data.shape[1])
+
+tmp = vdma_mmio.read(S2MM_VDMASR)
+print(hex(tmp))
+tmp = vdma_mmio.read(MM2S_VDMASR)
+print(hex(tmp))
+
+result_data.invalidate();
+vga_data
+plot.imshow(vga_data, cmap='gray')
+plot.show()
+plot.imshow(result_data, cmap='gray')
+plot.show()

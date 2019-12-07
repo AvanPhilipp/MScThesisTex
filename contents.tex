@@ -1,0 +1,57 @@
+% Ez a fájl felelős azért, hogy a projekt fájljait összefűzze egy kimeneti pdf-fé.
+
+% Ezeket írd át...
+\def\tipus{DIPLOMA THESIS} % --> ha MSc-s vagy, írd át "DIPLOMAMUNKA"-ra!
+\def\nev{Kóta Fülöp}
+\def\kepzes{Computer Science engineer MSc}
+\def\cim{Development of an embedded image processor architecture on FPGAs}
+\def\temavezetok{Supervisors: Dr.\ Nagy Zoltán, Dr.\ Zsedrovits Tamás}
+
+% címlap generálása
+\cimlap
+
+% A kötelező részeket római oldalszámozással tünteti fel a tartalomjegyzékben. Ha nagy betűvel írod a "Roman"-t, akkor nagy római számokkal fog számozni.
+\pagenumbering{roman}
+
+% Kötelező részek
+% Ha nem szeretnéd ezeket a részeket feltüntetni a tartalomjegyzékben, akkor egyszerűen töröld az \addcontentsline kezdetű sorokat.
+% \addcontentsline{toc}{chapter}{Témabejelentő}
+
+% Hogy kétoldalas nyomtatás esetén a témabejelentő közvetlenül a címlap után lehessen
+% \ureslap
+
+% A kétoldalas témabejelentő miatt a nyilatkozat oldalszáma 3
+\setcounter{page}{3}
+
+\addcontentsline{toc}{chapter}{Statement} 
+\input{contents/1-statement.tex}
+\addcontentsline{toc}{chapter}{Kivonat}
+\input{contents/2-kivonat.tex}
+\addcontentsline{toc}{chapter}{Abstract}
+\input{contents/3-abstract.tex}
+%% Vedd ki a százalék-jelet a következő két sor elől, ha szeretnél köszönetnyilvánítást beleírni a szakdogádba/diplomamunkádba.
+
+% Tartalomjegyzék legenerálása
+\tableofcontents 
+
+% Az innentől következő részek arab számozással kerülnek feltüntetésre a tartalomjegyzékben
+\pagenumbering{arabic}
+
+% Tartalmi részek - módosítsd nyugodtan
+\input{contents/4-introduction.tex}
+\input{contents/5-antecedents.tex}
+\input{contents/6-planing.tex}
+\input{contents/7-results.tex}
+\input{contents/8-sum.tex}
+
+\addcontentsline{toc}{chapter}{Acknowledgments}
+\input{contents/9-acknowledgments.tex}
+
+% Hivatkozásjegyzék/bibliográfia
+\nocite{*}
+\printbibliography
+\addcontentsline{toc}{chapter}{Bibliography}
+
+% Mellékletek - ha nincs mellékleted, töröld az alábbi részt
+\appendix
+\input{contents/appendix.tex}
