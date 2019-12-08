@@ -21,7 +21,7 @@ This image is considered the equivalent of the camera image of a real-life drone
 The images are converted to the OpenCV \cite{opencv_library} data format.
 After removing the alpha channel, a preprocessing algorithm is applied.
 For easier calculations, the image is converted to grayscale.
-This algorithm is consists of many well-known image processing algorithms, such as gaussian blur or erode.
+This algorithm is consists of many well-known image processing algorithms, such as Gaussian blur or erode.
 The preprocessing step separates the horizon and the aerial spaces, reducing the area where the algorithm should calculate.
 The aerial space then searched for possible dangerous objects, by reducing the images to edges and contours \cite{31447} \cite{SUZUKI198532}.
 For the dangerous parts, bounding boxes in OpenCV are determined, and these boxes are returned to the main block.
@@ -40,7 +40,7 @@ This tracker stores the previous data and tries to predict a track.
 For the project, the main goal is to run this algorithm on a live system.
 The input image, in this case, will be a camera image.
 The easier solution is to use the camera of the drone, however, it has a limited view only.
-The GoPro approach is a possible solution of this problem by providing a device available off the shelf, and an interchangeable sensor.
+The GoPro\texttrademark approach is a possible solution of this problem by providing a device available off the shelf, and an interchangeable sensor.
 This, however, is not a viable solution due to the requirement of a lot of HDMI connectors.
 There should be an imager system in place.
 
@@ -48,7 +48,7 @@ There should be an imager system in place.
 In \cref{sec:logibricks} are described as the primary target of the project.
 The SoC is fairly large, and has resources for supporting huge applications, like processing several HD images.
 The camera system can record $360^{\circ}$ images, and the attached cards are securely connected and bolted to the baseboard, reducing the chance of accidental disconnects.
-The FARKA connectors are also automotive ready and securely attached.
+The FARKA\texttrademark connectors are also automotive ready and securely attached.
 
 At 19th November 2018, the system arrived and assembled in the laboratory.
 There was a prebuilt SD (Secure Digital) card image included which can be plugged in and run without any difficulties.
@@ -56,7 +56,7 @@ The cameras and the connectors were working properly.
 However, the example project had a couple of issues.
 The versions of the shipped IP-s were not met, which was corrected by the company by sending a new download link.
 After the licensing and the version problems solved the block runs were throwing errors at the implementation phase.
-In the video-control block the use of the {oddr\_inst.u\_pix\_clk} resulted in a "cell are unresolved black boxes" error.
+In the video-control block the use of the \codeword{oddr\_inst.u\_pix\_clk} resulted in a "cell are unresolved black boxes" error.
 Since the IP core was classified no change in the internal system was allowed.
 
 The video controller IP is responsible for saving the video streams to memory and reading it from it.
@@ -81,7 +81,7 @@ For the future, a working block design must be created and the IIC control code 
 \subsection{AvNet MiPi} % 1539 characters
 After the failed attempt on the Logibricks\texttrademark camera system, another similar system was introduced. 
 The Avnet\texttrademark \cite{avnet_HUG} company uses the same approach.
-The kit also securely bolted to the baseboard, and FARKA connectors are used as well.
+The kit also securely bolted to the baseboard, and FARKA\texttrademark connectors are used as well.
 This system, however, uses an open software approach and provides sample projects as well as programming guides.
 The board transfers MIPI standard video data through the FMC connector.
 
@@ -92,8 +92,8 @@ The IP has an example design where the incoming MIPI camera signal is transmitte
 This example design, however, has some IPs blocks that are bounded by licence thus a D-PHY system was assembled by hand without the HDMI part.
 
 Assembling this system reveals another problem.
-The MIPI card pin settings that are described in the programming guide does not correspond with the Xilinx recommendation.
-In order to connect to the card, the pin setting should either be set according to the Xilinx settings, that results in an invalid input source error in the program.
+The MIPI card pin settings that are described in the programming guide does not correspond with the Xilinx\texttrademark recommendation.
+In order to connect to the card, the pin setting should either be set according to the Xilinx\texttrademark settings, that results in an invalid input source error in the program.
 It is also dangerous for both the card and the ZCU102 as well, since the connections can be overloaded due to the programs.
 The other option is to set the pins as the programming guide, which case the Vivado\texttrademark does not allow the bitstream generation process due to critical warnings.
 There was also example projects found on the internet, that resulted in the same errors.
@@ -102,7 +102,7 @@ The two cards are definitely not interchangeable, thus he configurations are not
 
 \subsection{HDMI I/O} % 1530 characters
 There was also an approach to transfer the image data from the simulator to the image processor via HDMI.
-This was first implemented with the Avnet AES-FMC-HDMI-CAM-G card \cite{avnet_HDMI}.
+This was first implemented with the Avnet\texttrademark AES-FMC-HDMI-CAM-G card \cite{avnet_HDMI}.
 The HDMI converter chip on the card uses the ITU-R Recommendation BT.601 or 709 colour space, and for transmitting this it uses the ITU-R BT.656 digital video protocol.
 This standard includes the horizontal and vertical signals into the data stream.
 This allows transferring of uncompressed data, both parallel and serial.
@@ -114,7 +114,7 @@ At each clock comes either a YCr or a YCb value pair.
 Both the Y and the Cr and Cb are encoded in 8 bits hence the 16-bit bandwidth.
 This reduces the 24-bit requirement of the VGA (Video Graphics Array) connector.
 
-For such transmission, the Xilinx provided IPs are still in preproduction, but it can be used.
+For such transmission, the Xilinx\texttrademark provided IPs are still in preproduction, but it can be used.
 However, the example project has some IP that the University license does not cover, so no block is generated.
 To overcome this obstacle a hand made solution was introduced again.
 The previously introduced VDMA connects to a Video AXI (Advanced eXtensible Interface) controller and stores the video to the memory.
@@ -128,7 +128,7 @@ After such signal is detected the correct control signals are transmitted accord
 For a final solution, the Ethernet solution was implemented.
 The PYNQ system tough works well for the dedicated boards, the ZCU102 is not one of them.
 For this, the Operating system should be built for the custom hardware.
-The foundation of the OS is a Petalinux, and it runs on Jupyther notebook.
+The foundation of the OS is a Petalinux\texttrademark, and it runs on Jupyther\texttrademark notebook.
 
 \subsection{ZCU102} % 2581 characters
 To build a system for a custom architecture requires a lot of superuser actions.
@@ -136,36 +136,36 @@ For safety it is recommended to use a virtual machine, not to ruin the working O
 The supported boards are easily built through a setup script that set all in place in a couple of hours.
 For the not supported board, the setting must be done by hand.
 First of all, some packages need to be installed or updated, based on the Ubuntu version the VM (Virtual Machine) is installed.
-Most of the systems are general, like the python, Jupyter and the Linux OS.
+Most of the systems are general, like the python, Jupyter\texttrademark and the Linux OS.
 These parts are built separately from the device-specific parts.
-The OS can be compiled for arm and aarch64 systems.
+The OS can be compiled for arm and \codeword{aarch64} systems.
 This is decided by the config files.
 There also can be added other OSs, by creating new folders and including the required bootstrap files.
-In the Makefile, the PACKAGE\_BUILD\_\$\{PACKAGE\_NAME\}\_\$\{ARCH\} specifies the package to install and for what architecture it is compiled.
+In the  \codeword{Makefile}, the \codeword{PACKAGE\_BUILD\_\$\{PACKAGE\_NAME\}\_\$\{ARCH\}} specifies the package to install and for what architecture it is compiled.
 For different OS and special boards, the parameters should be set before the making process.
 
 For the board-specific parts, the PYNQ has a boards folder.
 All the supported boards have here a subfolder, and for the custom boards also need to be created one.
-In this folder a .spec file sets up 3 crucial variable \texttt{BSP\_\$\{BOARD\}}, \texttt{BITSTREAM\_\$\{BOARD\}}, \texttt{STAGE4\_PACKAGES\_\$\{BOARD\}}. 
+In this folder a .spec file sets up 3 crucial variable \codeword{BSP\_\$\{BOARD\}}, \codeword{BITSTREAM\_\$\{BOARD\}}, \codeword{STAGE4\_PACKAGES\_\$\{BOARD\}}. 
 These variables are set up the board-specific settings, like the BSP (Board Support Packages) which is a description of the custom device, including the drivers and libraries.
 All the software are connecting to the BSP, and the BSP connects to the hardware.
 The bitstream contains the programming information for the FPGA.
 The stage 4 packages are the packages that are required to compile board-specific, but it is the part of the OS, like ethernet, USB or display devices.
 
-The two kinds of Xilinx SoCs is Zynq-7000 and Zynq UltraScale+.
+The two kinds of Xilinx\texttrademark SoCs is Zynq-7000 and Zynq UltraScale+\texttrademark.
 For these, the arm and the aarch64 architectures are used respectively.
-Both systems work properly with the PetaLinux prebuilt BSP, thus no image should be created.
-However, if specified BSP is required then a Viviado project should be created and from than a .hdf file is generated.
-If the .hdf file is copied into the petalinux\_bsp subfolder, it will be automatically included to the final BSP by the compiler process.
+Both systems work properly with the PetaLinux\texttrademark prebuilt BSP, thus no image should be created.
+However, if specified BSP is required then a Viviado\texttrademark project should be created and from than a \codeword{.hdf} file is generated.
+If the \codeword{.hdf} file is copied into the \codeword{petalinux\_bsp} subfolder, it will be automatically included to the final BSP by the compiler process.
 The custom packages are placed in the packages folder and transferred to the compiled system.
 This is a convenient way of installing custom notebooks or Python packages.
-make BOARDDIR=<absolute\_path>/myboards starts the building process of the custom system in the parameter myboards folder.
+\codeword{make BOARDDIR=<absolute\_path>/myboards} starts the building process of the custom system in the parameter myboards folder.
 
 The created image copied to an SD card, and after a couple of settings on the board the system boots.
 By default the board has a fixed IPv4 (Internet Protocol version 4) address, thus it can be accessed through a client PC.
-The Jupyter server runs on the 9000 port and can be accessed with the user password combination defined in the config file.
+The Jupyter\texttrademark server runs on the 9000 port and can be accessed with the user password combination defined in the config file.
 After accessing the notebooks, the Python environment is ready to use.
-The Jupyter environment also provides a root terminal to the system which makes it easy to control the OS.
+The Jupyter\texttrademark environment also provides a root terminal to the system which makes it easy to control the OS.
 
 \subsection{PYNQ overlays} % 2532 chatacters
 For the working PYNQ system, the python codes were implemented easily.
@@ -182,10 +182,10 @@ Since the whole code was written in Python, the algorithm is running on two-arm 
 With this the computational power is extremely small, resulting in a 2 fps (frames per seconds) processing speed.
 The speedup, however, lies in the FPGA part that in this case, it is not even in use.
 To use the FPGA part of the chip the PYNQ system provides an Overlay library.
-This is a .bit file compiled for the FPGA and loaded to the Jupyther notebook.
-Along with the bit file, there should be a .hwh file as well.
+This is a \codeword{.bit} file compiled for the FPGA and loaded to the Jupyther\texttrademark notebook.
+Along with the bit file, there should be a \codeword{.hwh} file as well.
 The HWH (HardWare Handout) describes the block design as an XML (eXtensible Markup Language), which helps the PYNQ system to provide functions, called register map, for controlling the IP.
-This is similar to the traditional workflow where the Vivado creates a header file for the C++ software implementations.
+This is similar to the traditional workflow where the Vivado\texttrademark creates a header file for the C++ software implementations.
 With this register map, the endpoints of the blocks can be driven.
 
 Such Overlays can be found on the community-driven forum page of PYNQ.
@@ -194,7 +194,7 @@ These community-driven overlays are usually compiled to the supported PYNQ board
 To use it the codes should be compiled for every overlay.
 This may result in a bit of bothersome extra work but nothing more.
 However, the image processing project is just a port from an HLS implementation to the PYNQ.
-For that, the so-called xfOpenCV which is the Xilinx implementation of the C++ OpenCV, can be implemented function by function to the FPGA.
+For that, the so-called xfOpenCV which is the Xilinx\texttrademark implementation of the C++ OpenCV, can be implemented function by function to the FPGA.
 This saves a lot of work and can speed up even further.
 Since the xfOpenCV contains all the functions, it is a huge library, with lots of unnecessary functions for our project.
 As for the overlays, there can be implemented a specific preprocessing overlay.
@@ -205,34 +205,61 @@ In contrast to the function by function solution, the Overlay connects the funct
 For the image processing tasks, the OpenCV Python implementation is used in the original system.
 This is a common and well-used solution.
 Since it is open-source, everyone can compile the source for any machine.
-In this case, the software implementation of the OpenCV is running on the ARM processors of the ZYNQ Ultrascale+ chip.
+In this case, the software implementation of the OpenCV is running on the ARM\texttrademark processors of the ZYNQ Ultrascale+\texttrademark chip.
 The fixed hardware executes the code as any normal processor architecture, so in this case, it is called a software implementation.
-The function is implemented on the FPGA, the output is not generated by one or more similar processing cores but loaded to application-specific hardware.
+The function is implemented on the FPGA, the output is not generated by one or more similar processing cores but loaded to application-specific hardware (\cref{fig:block_schem}).
 In this case, the wires and the LUTs (Look Up Tables) are directly responsible for the output product.
 Therefore this system cannot be used to anything else but the same function every time.
 This function, however, is not limited by the Fetch Decode Execute instruction cycle, nor the data-to-memory-copy latency.
 This gives the advantage over the SI (Single Instruction) processors, resulting in less power use, and higher processing speed.
 
+\begin{figure}
+    \centering
+\begin{tikzpicture}[node distance=2cm]
+    \node (ZYNQ) [startstop] {
+    \begin{tabular}{c}
+        ZYNQ \\ processor architecture
+    \end{tabular}
+    };
+    \node (Preprocess) [process,right of=ZYNQ,xshift=5cm, minimum height=1.7cm] {Preprocessor block};
+    \node (VDMA) [process, yshift=-1.5cm, below of=Preprocess, minimum height=1.7cm] {VDMA};
+
+    \draw [arrow] ([xshift=-1cm]Preprocess.south) -- node[anchor=east] {S2MM} ([xshift=-1cm]VDMA.north);
+    
+    \draw [arrow] ([xshift=1cm]VDMA.north) -- node[anchor=east] {MM2S} ([xshift=1cm]Preprocess.south);
+    
+    \draw [arrow] (ZYNQ) |- node[anchor=south west] {AxiLight}(VDMA);
+    
+    \draw [arrow] ([yshift=0.6cm]ZYNQ.east) -- node[anchor=south] {AxiLight}([yshift=0.6cm]Preprocess.west);
+    
+    \draw [arrow] ([yshift=0cm]ZYNQ.east) -- node[anchor=south] {kernel} ([yshift=0cm]Preprocess.west);
+    
+    \draw [arrow] ([yshift=-0.6cm]ZYNQ.east) -- node[anchor=south] {imge\_size} ([yshift=-0.6cm]Preprocess.west);
+\end{tikzpicture}
+    \caption{Schematic block design of the planned hardware implementation}
+    \label{fig:block_schem}
+\end{figure}
+
 \subsection{xfOpenCV} % 2823 characters
-The OpenCV implemented to the SoCs by Xilinx is the xfOpenCV.
+The OpenCV implemented to the SoCs by Xilinx\texttrademark is the xfOpenCV.
 This contains over 60 functions similar to the original OpenCV implementation but optimized for programmable logic.
 The library is also open-source, and free.
-The main part is written in C++ and can be used with SDSoC.
-In the SDSoC workflow, the C code is compiled for FPGA, a Vivado project is automatically generated, and the driver software is exported in one go.
+The main part is written in C++ and can be used with SDSoC\texttrademark.
+In the SDSoC\texttrademark workflow, the C code is compiled for FPGA, a Vivado\texttrademark project is automatically generated, and the driver software is exported in one go.
 This makes the work of the top-level designer easier but hides all the intermediate steps.
 This is not good for us since the output product here is a full-fledged design running on the FPGA.
-For a PYNQ system, the end product of a Vivado project is required, and the corresponding driver software is written in Python.
+For a PYNQ system, the end product of a Vivado\texttrademark project is required, and the corresponding driver software is written in Python.
 
 In the xfOpenCV, there are example projects for every function implemented.
-These projects are designed for SDSoC but can be imported to an HLS project.
-The function needs to be reworked since the type of the input and output images are xf::Mat template class.
+These projects are designed for SDSoC\texttrademark but can be imported to an HLS project.
+The function needs to be reworked since the type of the input and output images are \codeword{xf::Mat} template class.
 Such a template class is transcribed as an AXI Master interface, and since all fields of the class are transferred the resulting connection becomes unnecessarily complex.
-To solve this issue there are helper functions, that transfers a cf::Mat to a hls::stream format.
-This stream transfers the image pixel by pixel to the processing function where another function assembles the image again to an xf::Mat.
+To solve this issue there are helper functions, that transfers a \codeword{cf::Mat} to a \codeword{hls::stream} format.
+This stream transfers the image pixel by pixel to the processing function where another function assembles the image again to an \codeword{xf::Mat}.
 
 After this tricky roundabout, the image processing step is ready to start.
 The system is designed as a dataflow, which means that the adjacent functions save there results in a temporary variable and the next function uses this result as an input.
-For this, the FPGA \#dataflow directive provides an implementation, which uses no memory between the functions.
+For this, the FPGA \codeword{\#pragma dataflow} directive provides an implementation, which uses no memory between the functions.
 The function instead of writing the output to an allocated area (as in the SI case), created the interconnect configuration of these functions to be wired together.
 This results in a system that is compact from start to end and uses as less resource as possible.
 
@@ -255,7 +282,7 @@ The algorithm chose to use this algorithm, in order to eliminate the one-sided i
 Since it was not implemented in the xfOpenCV package, the first approach was to create one.
 For this, the already implemented convolution function was used.
 This convolution uses a custom kernel and the result is printed to the output image.
-The kernel in the case of the adaptive Threshold should be all ones, so in the final implementation, it can be optimised out.
+The kernel in the case of the adaptive threshold should be all ones, so in the final implementation, it can be optimised out.
 For that, the kernel was fully removed.
 The other difference is the thresholding part.
 The convolution only calculates the mean of the pixels, the threshold also compares the calculated mean value to the original pixel.

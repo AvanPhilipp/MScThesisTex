@@ -190,7 +190,22 @@ This gate array can work faster, and can even implement functionalities that are
     \label{fig:fpga_block}
 \end{figure}
 
-The modern FPGA chips are usually come with a microcontroller architecture integrated.
+FPGAs can be easily adapt to specialised tasks, but some tasks are not optimal, or hard to implement on programmable logic.
+Therefore the modern architectures are usually designed with Processor systems included.
+This means that the silicon slice has a dedicated part where fixed hardware is implemented.
+This reduces the area of the PL part but allows the whole silicon to work both as an FPGA or a PS as requested, in most cases as both at the same time.
+The Xilinx\texttrademark product line named there SoC products ZYNQ.
+There are several configurations and builds for this chip family.
+For the cheaper devices, the SoC contains an Artix\texttrademark or Kintex\texttrademark FPGA, which are both available separately, and an ARM cortex A-series chip.
+This setup is easy to design since the two subsystems are placed side by side each other.
+The higher-grade devices however required to design the whole FPGA part specifically for the device.
+These FPGA parts are resembled greatly to the other Ultrascale\texttrademark and Ultrascale+\texttrademark standalone FPGAs but modified some ways.
+The higher-end devices also can contain some special parts like R-series ARM\texttrademark processors for Real-Time applications, video codec hardware, of radiofrequency and telecommunication systems.
+There are also chips where a GPU is included on the silicon alongside the FPGA and the PS.
+These architectures also integrate HBM (High Bandwidth Memory) on the same chip.
+This ACAP (Adaptive Compute Acceleration Platform) system contains everything for accelerating a modern computational system.
+The special task implemented on the FPGA, the calculation tasks are done by the GPU, the cache and buffering loaded to the HBM and the system is controlled by the processor subsystem.
+It combines the advantages of all parts without sacrificing efficient programming. 
 This combined system called SoC.
 The modern system also changed the basic gate implementations to CLB (Configurable Logic Block).
 CLBs can solve more complex logic functions in there own by using LUT (Look Up Table) and contains register as well.
@@ -201,10 +216,6 @@ In the interconnecting part are also implemented a carry propagation connection,
 Thus greater adder circuits can be implemented without the carry occupying the connection bandwidth.
 DSP (Digital Signal Processor) slices also can be found among the logical blocks.
 This block contains simple ALUs (Arithmetic-Logic Unit), accelerating the major algorithms and reducing the CLB requirements of the signal processor applications.
-The modern architectures also integrate GPUs and HBM (High Bandwidth Memory) on the same chip.
-This ACAP (Adaptive Compute Acceleration Platform) system contains everything for accelerating a modern computational system.
-The special task implemented on the FPGA, the calculation tasks are done by the GPU, the cache and buffering loaded to the HBM and the system is controlled by the processor subsystem.
-It combines the advantages of all parts without sacrificing efficient programming. 
 The configurable SoCs are also small in size and runs on low power.
 
 The thesis discusses a system design that can read the camera images and detect the closing obstacle while running on SoC.

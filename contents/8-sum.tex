@@ -1,102 +1,43 @@
-\chapter{Summary} \label{ch:sum} % 7811 characters
+\chapter{Summary} \label{ch:sum}
 
-\section{Learn how to use the Xilinx Vivado developement tools to create an embedded system} % 1938 characters
-the two main manufacturers of FPGA is Altera and Xilinx.
-The University chose to contract with Xilinx that has a slightly more market share.
-The Xilinx FPGAs are shipped with the corresponding software and developer tools.
-To program these devices, either a hardware description language or prebuilt building blocks must be used.
-The Vivado Design Suite is a complex developer software, that allows the users to use either VHDL or Verilog languages, to design their software.
-Verilog is closer to the hardware level, VHDL allows more abstractions.
-Both are usefull to create functionalities.
-These code blocks can be imported to block design.
-This graphical programming interface allows the users to vire the already working blocks together for more complexity.
-in the block design, there also can be included the prebuilt and optimised IP blocks of common applications, like memory access, interconnections, clock generators or the processor subsystem for the SoC devices.
-There can be developed also testing circuits, which generates signals and can simulate the working circuit.
-This step helps the developer to avoid bugs or even dangerous commands in the hardware design.
-The simulation also speeds up the development, since there is no need to programme the device every time, can be done offline and allows detailed examination for the signal changes.
-The synthesis can be run if everything works properly.
-The synthesis compiles the hardware description and creates a theoretical circuit.
-This circuit thus uses the building block included in the FPGA but generates a generally implementable system.
-To became device-specific, the synthesised circuit must be implemented on the selected part.
-This circuit describes the exact vires and gates the program will use.
-The implementation cannot be transferred between devices as the synthesis.
-Finally, the implemented circuit should be written to a bitstream file.
-This bitstream is the configuration file for the programmable interconnect and the CLBs.
-This is a binary file that can be loaded to the device.
-The programmed device can be also monitored through USB (Universal Serial Bus) connection with the Vivado.
-If the design includes chip scope debug signals, these signal also can be followed by the Vivado debugger waveform display.
+To use a Xilinx device, the Xilinx software should be used.
+The first task was to get familiar with the workflow of an HLS hardware design.
+This included the Vivado HLS, the Vivado and the PYNQ system as well.
+To create a working hardware design the developer cannot rely just on the automated software functions but has to know the basic structure of the device.
+Therefore the directives can be designed optimised.
+The designer also has to know the exact working mechanism of the algorithm to implement.
+The algorithms usually executed on a serial execution processor, and it affects the result as well.
+For parallel execution, such as a hardware design, the code must be design, with the advantages and limitations of the hardware in mind.
 
-\section{Get familiar with the Xilinx Zynq FPSoC architecture} % 1133 characters
-FPGAs can be easily adapt to specialised tasks, but some tasks are not optimal, or hard to implement on programmable logic.
-Therefore the modern architectures are usually designed with Processor systems included.
-This means that the silicon slice has a dedicated part where fixed hardware is implemented.
-This reduces the area of the PL part but allows the whole silicon to work both as an FPGA or a PS as requested, in most cases as both at the same time.
-The Xilinx product line named there SoC products ZYNQ.
-There are several configurations and builds for this chip family.
-For the cheaper devices, the SoC contains an Artix or Kintex FPGA, which are both available separately, and an ARM cortex A-series chip.
-This setup is easy to design since the two subsystems are placed side by side each other.
-The higher-grade devices however required to design the whole FPGA part specifically for the device.
-These FPGA parts are resembled greatly to the other Ultrascale and Ultrascale+ standalone FPGAs but modified some ways.
-The higher-end devices also can contain some special parts like R-series ARM processors for Real-Time applications, video codec hardware, of radiofrequency and telecommunication systems.
-There are also chips where a GPU is included on the silicon alongside the FPGA and the PS, further increasing the variability of the device.
-
-\section{Get familiar with the current image processing system written in Python and OpenCV} % 1520 characters
-The current system uses well-known image processing algorithms that are implemented in many computer graphic library.
-These functions chained together can provide detailed information based on the pixeled data.
-For example, the erode function reduces the size of the white areas, by reducing the area by one pixel at the edges.
-This helps separate different objects, that may connect.
-The opposite of this function is the dilatation.
-This adds another layer of pixels at the edge of every white area.
-By this, the small objects can connect and act as one.
-These two functions applied after each other results the so-called opening and closing effect.
-This means that if the erosion separates two objects and the dilation was not able to reconnect them than those two was held on by a thin line of pixels, hence there are two separate objects.
-On the Close side, the same stands.
-If the merged objects can not be separated by the erosion than those are in reality one object, and the noise made them look like two.
-In both Open and the Close cases the objects keep their size, while the noise is removed.
-A Gaussian blur convolves the image by a special kernel, which is a discretised 2D Gaussian function.
-By applying it to the image, the centre pixel of the kernel has the greatest weight, and the neighbouring pixels are less emphasised.
-The thresholding function is a common solution for creating masks.
-In this case, the opposite drone should be selected by the mask, and the sky should be hidden.
-The image usually contains fine adjusted pixel values, and by thresholding, such an image, the jitter between the values can cause lots of noise on the thresholded image.
-Therefore it is good to smooth the image.
-This makes the sharp lines blur a little, but that is only visual.
-As the algorithm is applied the results became better.
-
-\section{Implement the blocks of the image processing system using C/C++ and take into account the special requirements of the Vivado HLS developement system} % 1069 characters
 The Xilinx xfOpenCV library was a great help in the development process since the library contains all the required functions.
 After validating the required functions an acceleration block was established.
 The block has to use dataflow to achieve maximal speed.
 The steps of the algorithm are set up as in the original code.
 The input of the block is a datastream of 8-bit unsigned data.
-The incoming datastream is converted to an xf::Mat format.
-For the convolution to work the block has to read in kernel\_size-1 lines from the image.
+The incoming datastream is converted to a \codeword{xf::Mat} format.
+For the convolution to work the block has to read in \codeword{kernel\_size-1} lines from the image.
 This adds to the latency since every step waits until enough pixel is not present at the input side.
-After converting the xf:Mat back to a stream the block feeds the stream to the outer program.
+After converting the \codeword{xf:Mat} back to a stream the block feeds the stream to the outer program.
 Since it is a streaming and dataflow system, the next image can be passed to the input right after the first, even the output image is not ready yet.
 There are 3 functions (the two erode and the dilate) which requires a kernel as an input.
 These kernels due to the dataflow property should be passed separately, even if they are all the same.
 Since the stream input hides the size of the images, also required to pass the height and width of the image to the block.
 These parameters are AXI connections and can be written directly before the start of the processing.
 
-\section{Extend the system with new image processing blocks according to the requirements of the task} % 845 characters
-Since the xfOpenCV library does not contained an adaptive threshold, which is a thresholding function that only takes in account the local area of the pixel, the extending was necessary.
-The function was desigbed according to two different approach.
+Since the xfOpenCV library does not contain an adaptive threshold, which is a thresholding function that only takes into account the local area of the pixel, the extending was necessary.
+The function was designed according to two different approaches.
 The first solution was to rework a simple convolution function.
-With this the least error was about 1-2\% of the pixels.
+With this, the least error was about 1-2\% of the pixels.
 The other implementation was the exact copy of the OpenCV solution.
 This used the xfOpenCV Boxfilter function.
-The Bosfilter had the tendency to calculate values that differs from the original solution only by 1.
+The Boxfilter tended to calculate values that differ from the original solution only by 1.
 This is not a huge amount of difference, but when other logic is chained after it the error bets larger.
 Based on the different delta setting the error differed from 1.2-12.9\% of the pixels.
-There was not enough time to measure the exact cause of the difference thatswhy it is a failiure.
+There was not enough time to measure the exact cause of the difference, why it is a failure.
 The thresholding function is replaced by the regular threshold, with an arbitrary 128 value, based on offline Otsu thresh calculations.
 
-\section{Create a software based test environment to test and validate the C/C++ model of the system} % 850 characters
-In the Vivado HLS workflow, it is required to have a reference solution implemented for PS.
-This solution is compared to the PL implemented system.
-The HLS simulates the parallel working system on a serial executing device, thus it may have failures, Hence it requires something to compare with.
-The OpenCV functions are also implemented in C/C++, not only python.
-Writing the test environment consisted of assembling the correct functions with OpenCV and run the same pictures through it, as the IP block is loaded.
+The final IP should be tested.
+Writing the test environment consisted of assembling the correct functions with OpenCV in C/C++ and run the same pictures through it, as the IP block is loaded.
 The two results are compared pixel by pixel and expected to differ in less than the 1\% of the pixels.
 The other test required when the adaptive threshold function was replaced with the regular one.
 For this, the original python code was modified.
@@ -104,7 +45,6 @@ The images were processed by two different preprocess function.
 Both results were expected to find the approaching drone in the air.
 After validating the correctly applied bounding boxes on the modified function, the system was considered validated.
 
-\section{Analize the main parameters of the synthetized circuit such as implementation area, power discipation and image processing performance} % 456 characters
 The final implementation including the PS and the VDMA IP block were measured.
 The system uses 5.74\% of the LUTs of the FPGA.
 This is the highest requirement on the resources followed by the 3.74\% Flip-Flops and the 3.73\% BRAM.
@@ -114,6 +54,5 @@ The system uses so few resources that it even can be deployed to a Zedbord.
 On the energy side, the most dissipation comes from the ARM cortex-A9.
 
 %!!! Ide kellene mög a POWER reportok!!!!
-
 
 \clearpage
