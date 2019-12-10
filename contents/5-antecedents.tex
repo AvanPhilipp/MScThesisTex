@@ -221,7 +221,6 @@ There is the possibility to design other IPs, but those are not always work prop
 This requires the user to write the python wrapper functions, that are already done for the prebuilt overlays.
 
 \section{FPGA development}
-% Developing to a hardware platform requires special tools.
 
 \subsection{High-level synthesis} % 503 characters
 The HLS (High-level synthesis) is an automated design process to generate hardware systems.
@@ -232,19 +231,19 @@ This includes the routing and the required Electric parts, as well as the timing
 For Xilinx\texttrademark products, the Vivado HLS\texttrademark also creates drivers for the generated IP block for easier integration.
 
 \subsection{Vivado} % 1072 characters
-The two main manufacturers of FPGA is Altera\texttrademark and Xilinx\texttrademark.
+The two main manufacturers of FPGA is Intel\texttrademark (formerly Altera) and Xilinx\texttrademark.
 The University chose to contract with Xilinx\texttrademark that has a slightly more market share.
 The Xilinx\texttrademark FPGAs are shipped with the corresponding software and developer tools.
 To program these devices, either a hardware description language or prebuilt building blocks must be used.
 The Vivado Design Suite\texttrademark is a complex developer software, that allows the users to use either VHDL (VHSIC-HDL) (Very High Speed Integrated Circuit Hardware Description Language) or Verilog languages, to design their software.
 Verilog is closer to the hardware level, VHDL allows more abstractions.
-Both are usefull to create functionalities.
+Both are useful to create functionalities.
 These code blocks can be imported to block design.
 This graphical programming interface allows the users to wire the already working blocks together for more complexity.
 In the block design, there also can be included the prebuilt and optimised IP blocks of common applications, like memory access, interconnections, clock generators or the processor subsystem for the SoC devices.
 There can be developed also testing circuits, which generates signals and can simulate the working circuit.
 This step helps the developer to avoid bugs or even dangerous commands in the hardware design.
-The simulation also speeds up the development, since there is no need to programme the device every time, can be done offline and allows detailed examination for the signal changes.
+The simulation also speeds up the development, since there is no need to program the device every time, can be done offline and allows detailed examination for the signal changes.
 The synthesis can be run if everything works properly.
 The synthesis compiles the hardware description and creates a theoretical circuit.
 This circuit thus uses the building block included in the FPGA but generates a generally implementable system.

@@ -91,8 +91,6 @@ The convolution can be used for different applications, based on the kernel it u
 As not only the central pixel is considered but the neighbouring values as well, the resulting image transforms in relation to the environment of each pixel.
 It can smooth the image, can enhance the edges or blur.
 
-% The greatest advance in the convolution was when as a neural network, the kernel weights was set by a deep learning algorithm.
-
 \subsection{Neural network} % 3742 characters
 Deep learning is a buzzword, in the IT industry, for almost a decade.
 This is a Machine learning method, for applications where the usual algorithmic approach is not possible.
@@ -131,7 +129,7 @@ These features are not always has some physical meaning rather some abstract rep
 \end{figure}
 
 The kernel stride determines how small the output image will be.
-On every stride step, one pixel is calculated, hence if the stride is 2 then every $2^{nd}$ pixel is calculated.
+On every stride step, one pixel is calculated, hence if the stride is 2 then every 2nd pixel is calculated.
 This makes the output image half of the size of the input image.
 This is not a problem for such a system since the required information is not graphical, thus if the smaller image can store the information the fewer resources should be used.
 
@@ -147,7 +145,7 @@ This property makes it easy to calculate, but still providing the required nonli
 \begin{figure}
 \centering
 \includegraphics[width=.85\linewidth]{images/activation-functions.jpg}
-\caption{examples of possible activation functons in a neural network \cite{sebastian_activation} }
+\caption{Examples of possible activation functons in a neural network \cite{sebastian_activation} }
 \label{fig:relufunc}
 \end{figure}
 
@@ -163,7 +161,7 @@ This layer transforms the grid-like values to an array or a single number.
 But instead of weighting the pixel values, now it weights features extracted by the previous layers.
 Usually, an array is preferred, where the array elements are all the possibilities of a certain output.
 The array can be considered the confidence of the network.
-This is called One hot encoding
+This is called One hot encoding.
 
 \subsection{FPGA} % 2917 characters
 The drones, due to weight limits, unable to carry large power sources, and the computing devices should also be small, light and energy-efficient, hence the GPUs (Graphical Processing Unit) are out of the picture.
@@ -178,7 +176,7 @@ In case of an FPGA however, the silicon parts are already in place, only by prog
 
 The system implemented on an FPGA will of course never be as fast as an ASIC (Application-Specific Integrated Circuit) optimised for the exact task.
 On the other hand, the FPGA has not to be reworked from scratch every time a new task is at hand.
-Designing new software to program the interconnects, does require less time and less expensive.
+Designing new software to program the interconnects does require less time and is less expensive.
 An FPGA can also be used for different purposes based on the program.
 In comparison to the classical processing algorithms, the FPGA does not use a finite ISA (Instruction Set Architecture), but a low-level gate array.
 This gate array can work faster, and can even implement functionalities that are hard or not possible with a traditional SISD (single instruction stream, single data stream) architecture.
@@ -186,11 +184,11 @@ This gate array can work faster, and can even implement functionalities that are
 \begin{figure}
     \centering
     \includegraphics[width=\linewidth]{images/fpga-block-diagram.png}
-    \caption{Block diagramm of an FPGA (\cite{fpga_block})}
+    \caption{Block diagramm of an FPGA \cite{fpga_block}}
     \label{fig:fpga_block}
 \end{figure}
 
-FPGAs can be easily adapt to specialised tasks, but some tasks are not optimal, or hard to implement on programmable logic.
+FPGAs can be easily adapt to specialised tasks, but some tasks are not optimal, or difficult to implement on programmable logic.
 Therefore the modern architectures are usually designed with Processor systems included.
 This means that the silicon slice has a dedicated part where fixed hardware is implemented.
 This reduces the area of the PL part but allows the whole silicon to work both as an FPGA or a PS as requested, in most cases as both at the same time.
@@ -202,7 +200,7 @@ The higher-grade devices however required to design the whole FPGA part specific
 These FPGA parts are resembled greatly to the other Ultrascale\texttrademark and Ultrascale+\texttrademark standalone FPGAs but modified some ways.
 The higher-end devices also can contain some special parts like R-series ARM\texttrademark processors for Real-Time applications, video codec hardware, of radiofrequency and telecommunication systems.
 There are also chips where a GPU is included on the silicon alongside the FPGA and the PS.
-These architectures also integrate HBM (High Bandwidth Memory) on the same chip.
+These architectures also integrate HBM (High Bandwidth Memory) on the same package.
 This ACAP (Adaptive Compute Acceleration Platform) system contains everything for accelerating a modern computational system.
 The special task implemented on the FPGA, the calculation tasks are done by the GPU, the cache and buffering loaded to the HBM and the system is controlled by the processor subsystem.
 It combines the advantages of all parts without sacrificing efficient programming. 
@@ -220,4 +218,4 @@ The configurable SoCs are also small in size and runs on low power.
 
 The thesis discusses a system design that can read the camera images and detect the closing obstacle while running on SoC.
 
-\clearpage % Ez azért kell, hogy nehogy képek átcsússzanak a következő fejezethez
+\clearpage

@@ -221,14 +221,21 @@ This gives the advantage over the SI (Single Instruction) processors, resulting 
         ZYNQ \\ processor architecture
     \end{tabular}
     };
-    \node (Preprocess) [process,right of=ZYNQ,xshift=5cm, minimum height=1.7cm] {Preprocessor block};
+    \node (Preprocess) [process,right of=ZYNQ,xshift=4cm, minimum height=1.7cm] {Preprocessor block};
     \node (VDMA) [process, yshift=-1.5cm, below of=Preprocess, minimum height=1.7cm] {VDMA};
+    \node (DDR) [io, xshift=3.5cm, right of=VDMA, minimum height=1.7cm] {
+    \begin{tabular}{c}
+        DDR memory \\ (off chip)
+    \end{tabular}};
 
     \draw [arrow] ([xshift=-1cm]Preprocess.south) -- node[anchor=east] {S2MM} ([xshift=-1cm]VDMA.north);
     
     \draw [arrow] ([xshift=1cm]VDMA.north) -- node[anchor=east] {MM2S} ([xshift=1cm]Preprocess.south);
     
-    \draw [arrow] (ZYNQ) |- node[anchor=south west] {AxiLight}(VDMA);
+    \draw [arrow] (ZYNQ) |- node[anchor=south west] {AXI ports}(VDMA);
+    
+    \draw [arrow] (DDR.west) -- node[anchor=south] {Memory}(VDMA.east);
+    \draw [arrow] (VDMA.east) -- node[anchor=north] {Access} (DDR.west);
     
     \draw [arrow] ([yshift=0.6cm]ZYNQ.east) -- node[anchor=south] {AxiLight}([yshift=0.6cm]Preprocess.west);
     
@@ -294,7 +301,7 @@ However, after adding the required modifications to the solution, the result was
 It either can be, because of the number representation on the FPGA, or the complicated method in the original OpenCV implementation, that calculates the output value.
 
 The other approach was to replicate the OpenCV original function on the hardware.
-The already implemented box filter works flawlessly in the example design resulting in a 1.616923 \% error rate.
+The already implemented box filter works flawlessly in the example design resulting in a 1.61 \% error rate.
 This is the result of different border conditions.
 xfOpenCV only implemented the constant border values, in the original, there is a replicate border.
 It also can be seen on the differential image.

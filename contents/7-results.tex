@@ -52,19 +52,6 @@ All the layers are applied to a ReLU function (line 34-38), and after the convol
 The first convolutional layer contains 10 output layers (line 23), and the second one contains 5 (line 24).
 The two fully connected layers have 128 and 2 output layers. 
 
-The preprocessing function takes an OpenCV image.
-At first, it detects the horizon.
-For this, it takes a series of numbers (line 2).
-These points become the inflexion point of the segmented line of the horizon borderline.
-Based on the complexity of the horizon (how segmented the line should be) not all the points are used.
-After applying the horizon detect, comes the image processing part in question.
-There is a series of OpenCV functions applied to the image (line 49-54).
-There is an adaptive threshold function is replaced by a regular threshold function.
-This was a necessity due the xfOpenCV does not have the adaptive threshold function implemented.
-For the final result, both functions provide similar results, thus the two functions are interchangeable (\cref{fig:thresh_compar}).
-There was also an attempt to implement the adaptive threshold for FPGA, but at the validation, the error measure was usually over 1\% which is too high error rate for an image processing system.
-The final step is to find the contours on the image.
-However, this part cannot be included in the FPGA system since there is a double cycle that manipulates the image, thus ruining the dataflow.
 
 \begin{figure}
     \centering
@@ -125,7 +112,20 @@ However, this part cannot be included in the FPGA system since there is a double
     \caption{Comparition of threshold and adaptive-threshold}
     \label{fig:thresh_compar}
 \end{figure}
-\clearpage
+
+The preprocessing function takes an OpenCV image.
+At first, it detects the horizon.
+For this, it takes a series of numbers (line 2).
+These points become the inflexion point of the segmented line of the horizon borderline.
+Based on the complexity of the horizon (how segmented the line should be) not all the points are used.
+After applying the horizon detect, comes the image processing part in question.
+There is a series of OpenCV functions applied to the image (line 49-54).
+There is an adaptive threshold function is replaced by a regular threshold function.
+This was a necessity due the xfOpenCV does not have the adaptive threshold function implemented.
+For the final result, both functions provide similar results, thus the two functions are interchangeable (\cref{fig:thresh_compar}).
+There was also an attempt to implement the adaptive threshold for FPGA, but at the validation, the error measure was usually over 1\% which is too high error rate for an image processing system.
+The final step is to find the contours on the image.
+However, this part cannot be included in the FPGA system since there is a double cycle that manipulates the image, thus ruining the dataflow.
 
 \section{HLS Prepocess} % 3401 characters
 
@@ -155,8 +155,11 @@ This has to be handled by the python program as well.
     \centering
     \includegraphics[width=.32\linewidth]{images/preproc/out_ocv.jpg}
     \includegraphics[width=.32\linewidth]{images/preproc/hls_out.jpg}
-    \includegraphics[width=.32\linewidth]{images/preproc/error.png}
-    \caption{Preprocessing comparison of the OpenCV image, the HLS block, and the visual differences.}
+    % \includegraphics[width=.32\linewidth]{images/preproc/error.png}
+    % \includegraphics[width=.32\linewidth]{images/preproc/out_ocv_negative.jpg}
+    % \includegraphics[width=.32\linewidth]{images/preproc/hls_out_negative.jpg}
+    \includegraphics[width=.32\linewidth]{images/preproc/error_negative.png}
+    \caption{Preprocessing comparison of the OpenCV image, the HLS block, and the differences. The error image are negative for better comparison.}
     \label{fig:preproc_compare}
 \end{figure}
 
@@ -173,7 +176,7 @@ The OpenCV installed on the computer is also compiled in release more, hence the
 After the reference image, the data is converted to a \codeword{hls::stream} (line 24), for easier transfer.
 The stream is fed to the block and the output stream is written back to another image (line 28).
 After the results are written in two variable, by both the OpenCV and the HLS block as well, the difference between the two is calculated (line 32).
-The test showed an average of 0.150892\%of pixels above the error threshold.
+The test showed an average of 0.15\%of pixels above the error threshold.
 Here a simple differential calculation is used, but in some cases, other error measures had to be introduced.
 All three image is written to the disc for visual comparison (line 20,30,34) (\cref{fig:preproc_compare}).
 
@@ -244,7 +247,12 @@ BUFG & 1 & 404 & 0.25 \\ \hline
 \end{tabular}
 \end{table}
 
-%!!! POWER REPORT KELL IDE IS
+\begin{figure}
+    \centering
+    \includegraphics{images/power_report.png}
+    \caption{Power requirements of the final hardware}
+    \label{fig:power}
+\end{figure}
 
 \clearpage
 
@@ -371,19 +379,20 @@ With this, if the IPs are started the preprocessing block can load and read the 
 
 \section{Speed, Consumption} % 1461 characters
 
-According to the previous tables (\cref{tab:preproc_hls_usage}, \cref{tab:preproc_hls_timing}, \cref{tab:preproc_hls_latency}), the IP block consumes 3.931 W energy.
+According to the previous tables (\cref{tab:preproc_hls_usage}, \cref{tab:preproc_hls_latency}), the IP block consumes 3.931 W energy.
 The clock of the preprocess block is set to 5 ns speed and the resulting implementation finished with 1.226 ns WNS (Worst Negative Slack), 0.01 ns WHS (Worst Negative Slack) and 0.998 ns WPWS (Worst Pule Width Slack).
 This adds up to $1.226 + 0.01 + 0.998 = 2.234 ns$ clock time.
 Since it is way under the required 5 ns the implementation can easily run on 200 MHz clock.
-The latency of the system is minimum 8321526 clock cycles, the whole runs for $8321526 / 2e+8 = 0.04160763 sec$.
-This makes it possible to process the images a little below 25 fps ($0.04160763 spf * 24 f = 0.99858312 s$).
-This measurements are done for the template parameters \codeword{width=3840}, \codeword{height=2160} ($3840 * 2160 = 8294400 pixel$) UHD (Ultra-High-Definition) images.
+The latency of the system is minimum 8,321,526 clock cycles, one frame is processed in $8,321,526 / (2\cdot10^8) = 41.608 ms$.
+This makes it possible to process the input video around 24 fps $2\cdot10^8/8,321,526=24.034$. %($0.04160763 spf * 24 f = 0.99858312 s$).
+This measurements are done for the template parameters \codeword{width=3840}, \codeword{height=2160} ($3840 * 2160 = 8,294,400 pixel$) UHD (Ultra-High-Definition) images.
 The actual implementation, however, can be much faster than that, since the Gaussian blur and the Threshold functions are not that slow, as the synthesis shows.
-The convolutional kernels are confusing the synthesiser, thus user-specified values must be given to them.
+The convolutional kernels are confusing the synthesiser, as the loops cannot be optimised in the compilation phase.
+The synthesiser cannot determine the run count of the cycles, thus user-specified values must be given.
 The User-specific values are computed by the maximal size of a possible image (the template parameters), but the function works according to the size of the loaded image.
-As the resolution drops from UHD to FullHD, which was originally planned, the pixels to process drop down from 8294400 to 2073600.
-The possible speed in this case $2073600 / 2e+8 = 0.010368 sec$ and $0.010368 spf * 96 f = 0.995328 s$ 96 fps.
-With the $1024*576=589824$ resolution of the airsim simulator, the posible speed is $589824/ 2e+8 = 0.00294912$ thus  $0.00294912 * 338 = 0.99680256$ 338fps.
+As the resolution drops from UHD to FullHD, which was originally planned, the pixels to process drop down from 8,294,400 to 2,073,600.
+The possible speed in this case $2,073,600 / (2\cdot10^8) = 10.368 ms$ and $2\cdot10^8/2,073,600 = 96.45$ fps.
+With the $1024*576=589,824$ resolution of the airsim simulator, the possible speed is $589,824/ (2\cdot10^8) = 2.949 ms$ thus  $2\cdot10^8/589,824 = 339.084$ fps.
 Both the 25 and the 96 fps are better result compared to the original 2.1 fps on the first run on the ZCU102.
 
 \clearpage

@@ -2,16 +2,15 @@
 A széleskörben terjedő pilóta nélküli repülőgépek (Unmanned Aerial Vehicles UAV) növelik a a balesetek lehetőségét, ezért elengedhetetlen új módszerek fejlesztése, amik segítenek elkerülni a veszélyes közelségeket illetve baleseteket.
 A repülőgépek kicsi mérete miatt csak passzív képfeldolgozó rendszerek telepítése lehetséges, azonban nagyfelbontású kamerák szükségesek egy veszélyes helyzet megfelelő távolból történő érzékelésére.
 A nagy felbontású képfolyam valós idejű feldolgozására nagy számítási teljesítmény szükséges.
-Ez csak alkalmazás specifikus képfeldolgozó architektúrával lehet elérni.
+Ez csak alkalmazás-specifikus képfeldolgozó architektúrával lehet elérni.
 
 Ilyen architektúrák azonban mind méretben mind energiaszükségletben túlméretesek a repülőgépekhez képest.
 A megoldást a programozható logiaki áramkörök jelenthetik.
-Beágyazott rendszerek mind energiafelhasználásban, mind méretben sokkal kisebbek mint a hagyományos architektúrák, ugyanakkor a probléma specifikus algoritmus megvalósításnak köszönhetően a számítási teljesítmény nem csökken.
+Beágyazott rendszerek mind energiafelhasználásban, mind méretben sokkal kisebbek mint a hagyományos architektúrák, ugyanakkor a probléma-specifikus algoritmus megvalósításnak köszönhetően a számítási teljesítmény nem csökken.
 A beágyazott rendszerek továbbá könnyen kiegészíthetőek más hasonló rendszerekkel, hogy együtt dolgozva a számítási feladatokat megosszák egymással.
 
 Programozható logikai áramkörök segítségével a képfeldolgozó algoritmusokat hardware szinten lehet implementálni.
-Az algoritmus többi része a chipen található processzor alrendszeren tud futni.
-Ezzel még inkább csökkenthető az energiafelhasználás.
+Az algoritmus többi része a chipen található processzor alrendszeren tud futni, ezzel még inkább csökkentve az energiafelhasználást.
 
 A végeredmény egy olyan hardware design ami képes feldolgozni egy $3840 \times 2160$ felbontású képet 0.04160763 másodperc alatt.
 Ez a kép lehet egy UHD kamera képe nagyon részletes felbontással, de állhat 4 különálló HD kamera képéből is.
